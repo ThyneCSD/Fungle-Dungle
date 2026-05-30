@@ -29,7 +29,38 @@ public class CarMechanics : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Forwardmovement
+        if (Input.GetKey(KeyCode.W))
+        {
+            forwardVelocity = 1;
+        }
+        else if (Input.GetKey(KeyCode.S))
+        {
+            forwardVelocity = -1;
+        }
+        else
+        { 
+        forwardVelocity = 0;
+        }
+        //Rotation
+        if (Input.GetKey(KeyCode.A))
+        {
+            rotationalVelocity = 1;
+        }
+        else if (Input.GetKey(KeyCode.D))
+        {
+            rotationalVelocity = -1;
+        }
+        else
+        {
+            rotationalVelocity = 0;
+        }
+
+
+
         //1 is dan forwardvelocity
-        rb.linearVelocity = new Vector2(0, 1);
+        //rb.linearVelocity = new Vector2(0, forwardVelocity);
+        rb.linearVelocity = transform.up * forwardVelocity;
+        rb.angularVelocity = rotationalVelocity * 10;
     }
 }
