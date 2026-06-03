@@ -4,21 +4,26 @@ using UnityEngine;
 public class GameLoopManager : MonoBehaviour
 {
     [SerializeField] private DeckManager deckManager;
-    [SerializeField] private TextMeshProUGUI GameloopText;
+    [SerializeField] private TextMeshProUGUI handValueText;
+    [SerializeField] private TextMeshProUGUI gameloopText;
 
     void Start()
     {
-        deckManager = GetComponent<DeckManager>();
-        GameloopText = GetComponent<TextMeshProUGUI>();
+        if (deckManager == null)
+            deckManager = FindFirstObjectByType<DeckManager>();
     }
 
     void Update()
     {
-        GameloopText.text = "Hand value: " + deckManager.CalculateHandValue();
+        int handValue = deckManager.CalculateHandValue();
+        handValueText.text = "Hand value: " + handValue;
 
-        if (deckManager.CalculateHandValue() > 21)
+        if (handValue > 21)
         {
-            GameloopText.text = "Bust! You lose.";
+            gameloopText.text = "Bust! You lose.";
+        } else if (handValue == 21)
+        {
+            gameloopText.text = "Blackjack! You win!";
         }
     }
 }

@@ -19,10 +19,6 @@ public class DeckManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            DrawAndSpawnCard(cardSpawnPoint.position);
-        }
             Debug.Log("Hand value: " + CalculateHandValue());
     }
 
@@ -115,5 +111,10 @@ public class DeckManager : MonoBehaviour
         }
 
         return total;
+    }
+
+    public void HitButton()  
+    {
+        DrawAndSpawnCard(cardSpawnPoint.position);
     }
 }
