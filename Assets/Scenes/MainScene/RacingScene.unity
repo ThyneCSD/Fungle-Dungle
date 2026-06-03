@@ -172,10 +172,10 @@ MonoBehaviour:
   m_Intensity: 3
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000
+  m_ApplyToSortingLayers: 00000000d965dc18
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
-  m_LightOrder: 1
+  m_LightOrder: 100
   m_AlphaBlendOnOverlap: 0
   m_OverlapOperation: 0
   m_NormalMapDistance: 3
@@ -227,7 +227,7 @@ SpriteRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
@@ -251,7 +251,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 100
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 0.9857435, b: 0.36320752, a: 1}
@@ -316,10 +316,10 @@ MonoBehaviour:
   m_Intensity: 3
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000
+  m_ApplyToSortingLayers: 00000000d965dc18
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
-  m_LightOrder: 1
+  m_LightOrder: 100
   m_AlphaBlendOnOverlap: 0
   m_OverlapOperation: 0
   m_NormalMapDistance: 3
@@ -371,7 +371,7 @@ SpriteRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
@@ -395,7 +395,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 100
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 0.9857435, b: 0.36320752, a: 1}
@@ -639,7 +639,7 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -1
   m_MaskInteraction: 0
-  m_Time: 1
+  m_Time: 1e+9
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
@@ -662,17 +662,17 @@ TrailRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
-      key1: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 1}
-      key3: {r: 0, g: 0, b: 0, a: 0}
+      key1: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
+      key2: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
+      key3: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
       ctime1: 65535
-      ctime2: 0
-      ctime3: 0
+      ctime2: 65535
+      ctime3: 65535
       ctime4: 0
       ctime5: 0
       ctime6: 0
@@ -874,7 +874,7 @@ MonoBehaviour:
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000
+  m_ApplyToSortingLayers: 00000000d965dc18
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
@@ -1124,11 +1124,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CarMechanics
   rb: {fileID: 784382402}
   topForwardSpeed: 10
-  topReverseSpeed: 4
-  topForwardAcceleration: 1000
-  topReverseAcceleration: 200
-  accelerationIncrease: 3
-  accelerationDecrease: 2
+  topReverseSpeed: -4
+  accelerationIncrease: 0.15
+  accelerationDecrease: 0.3
+  frictionVelocityDecrease: 0.05
 --- !u!1 &865942541
 GameObject:
   m_ObjectHideFlags: 0
@@ -1270,7 +1269,7 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -1
   m_MaskInteraction: 0
-  m_Time: 1
+  m_Time: 1e+9
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
@@ -1293,17 +1292,17 @@ TrailRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
-      key1: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 1}
-      key3: {r: 0, g: 0, b: 0, a: 0}
+      key1: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
+      key2: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
+      key3: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
       ctime1: 65535
-      ctime2: 0
-      ctime3: 0
+      ctime2: 65535
+      ctime3: 65535
       ctime4: 0
       ctime5: 0
       ctime6: 0
@@ -1505,7 +1504,7 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -1
   m_MaskInteraction: 0
-  m_Time: 1
+  m_Time: 1e+9
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
@@ -1528,17 +1527,17 @@ TrailRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
-      key1: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 1}
-      key3: {r: 0, g: 0, b: 0, a: 0}
+      key1: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
+      key2: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
+      key3: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
       ctime1: 65535
-      ctime2: 0
-      ctime3: 0
+      ctime2: 65535
+      ctime3: 65535
       ctime4: 0
       ctime5: 0
       ctime6: 0
@@ -1845,7 +1844,7 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -1
   m_MaskInteraction: 0
-  m_Time: 1
+  m_Time: 1e+9
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
@@ -1868,17 +1867,17 @@ TrailRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
-      key1: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 1}
-      key3: {r: 0, g: 0, b: 0, a: 0}
+      key1: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
+      key2: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 1}
+      key3: {r: 0.20784314, g: 0.20784314, b: 0.20784314, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
       ctime1: 65535
-      ctime2: 0
-      ctime3: 0
+      ctime2: 65535
+      ctime3: 65535
       ctime4: 0
       ctime5: 0
       ctime6: 0
