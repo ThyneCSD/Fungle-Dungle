@@ -46,11 +46,14 @@ public class CarMechanics : MonoBehaviour
         }
         else
         {
-            // CORRECTIE: Remmen met Time.deltaTime zodat het frame-onafhankelijk is.
-            // 0.001f was te zacht, we gebruiken nu een rem-factor (bijv. 3f). 
-            // Mathf.MoveTowards zorgt dat hij netjes bij exact 0 stopt en niet doorschiet.
-            
-            forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, frictionVelocityDecrease * Time.deltaTime);
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+            {
+                forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, 3 * frictionVelocityDecrease * Time.deltaTime);
+            }
+            else
+            {
+                forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, frictionVelocityDecrease * Time.deltaTime);
+            }
         }
         /*
         else if (forwardVelocity > 0)
