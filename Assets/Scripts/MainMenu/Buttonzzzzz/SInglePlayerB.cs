@@ -12,6 +12,11 @@ public class SInglePlayerB : MonoBehaviour
     {
         SceneManager.LoadScene("BlackJackScene");
     }
+
+    public void RacinOnCLick()
+    {
+        SceneManager.LoadScene("RacingScene");
+    }
 }
 
 

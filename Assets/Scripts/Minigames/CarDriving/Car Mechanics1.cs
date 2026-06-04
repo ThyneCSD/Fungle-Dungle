@@ -13,47 +13,72 @@ public class CarMechanics1 : MonoBehaviour
     [SerializeField] private float accelerationDecrease = 0.07f;
     [SerializeField] private float frictionVelocityDecrease = 0.02f;
     [SerializeField] private float baseTurnSpeed = 45f;
-    public float driftFactor = 1f;
 
+    public float AccelerationValue = 0;
+    
     private float rotationalVelocity = 0;
     private float forwardVelocity = 0;
     private float acceleration = 0;
     private float rotationSpeedMultiplier = 1;
-    
+
 
     void Start()
     {
-        
+
+    }
+    public void AccelerationChanged(float acc)
+    {
+        AccelerationValue = acc;
+
+    }
+
+    public void SteeringChanged(float str)
+    {
+        rotationalVelocity = str;
+
     }
 
     // Update is called once per frame
     void Update()
     {
+        Debug.Log($"AccelerationValue = {AccelerationValue}");
         Debug.Log(forwardVelocity);
         //Forwardmovement
-        if (Input.GetKey(KeyCode.W))
+        if (AccelerationValue > 0)
         {
             //forwardVelocity = 5;
             //forwardVelocity += accelerationIncrease;
-            forwardVelocity += (topForwardSpeed - forwardVelocity) * accelerationIncrease * Time.deltaTime;
+            forwardVelocity += (topForwardSpeed - forwardVelocity) * (AccelerationValue * accelerationIncrease) * Time.deltaTime;
+
+
         }
-        else if (Input.GetKey(KeyCode.S))
+        else if (AccelerationValue < -1)
         {
-            //forwardVelocity = -5;
-            //forwardVelocity -= accelerationDecrease;
-            //forwardVelocity -= (topReverseSpeed + forwardVelocity) * accelerationIncrease * Time.deltaTime;
-            forwardVelocity += (topReverseSpeed - forwardVelocity) * accelerationIncrease * Time.deltaTime;
+            forwardVelocity += (topReverseSpeed - forwardVelocity) * (AccelerationValue * accelerationDecrease) * Time.deltaTime;
         }
         else
         {
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+            if (rotationalVelocity > 0)
             {
-                forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, 3 * frictionVelocityDecrease * Time.deltaTime);
+                forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, rotationalVelocity * 3 * frictionVelocityDecrease * Time.deltaTime);
+            }
+            else if (rotationalVelocity < 0)
+            {
+                forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, -rotationalVelocity * 3 * frictionVelocityDecrease * Time.deltaTime);
             }
             else
             {
                 forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, frictionVelocityDecrease * Time.deltaTime);
+            
             }
+            /*
+             *
+             *if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+            {
+                forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, 3 * frictionVelocityDecrease * Time.deltaTime);
+            }
+             */
+
         }
         /*
         else if (forwardVelocity > 0)
@@ -68,7 +93,7 @@ public class CarMechanics1 : MonoBehaviour
         else { forwardVelocity = 0; } 
         */
 
-        //Rotation
+        /*
         if (Input.GetKey(KeyCode.A))
         {
             rotationalVelocity = 1;
@@ -81,7 +106,7 @@ public class CarMechanics1 : MonoBehaviour
         {
             rotationalVelocity = 0;
         }
-
+        */
 
 
         //1 is dan forwardvelocity
@@ -93,33 +118,13 @@ public class CarMechanics1 : MonoBehaviour
 
         }
         else if (forwardVelocity < topReverseSpeed)
-        { 
+        {
             forwardVelocity = topReverseSpeed;
         }
 
 
 
-        //rb.linearVelocity = transform.up * forwardVelocity;
-        
-
-
-
-
-        // 1. Bereken de gewenste snelheid vooruit
-        Vector2 forwardForce = transform.up * forwardVelocity;
-
-        // 2. Splits de huidige snelheid in voorwaarts en zijwaarts
-        Vector2 forwardVelocityVec = transform.up * Vector2.Dot(rb.linearVelocity, transform.up);
-        Vector2 rightVelocityVec = transform.right * Vector2.Dot(rb.linearVelocity, transform.right);
-
-        // 3. Verminder de zijwaartse snelheid op basis van de driftFactor
-        // De voorwaartse kracht wordt toegepast om te versnellen
-        rb.linearVelocity = forwardVelocityVec + (rightVelocityVec * driftFactor);
-
-        // Optioneel: Voeg hier je input toe voor de forwardForce
-        // rb.linearVelocity += forwardForce * Time.fixedDeltaTime;
-
-
+        rb.linearVelocity = transform.up * forwardVelocity;
 
 
         float speedFactor = Mathf.InverseLerp(0f, 2f, Mathf.Abs(forwardVelocity));
@@ -163,3 +168,4 @@ public class CarMechanics1 : MonoBehaviour
         */
     }
 }
+
