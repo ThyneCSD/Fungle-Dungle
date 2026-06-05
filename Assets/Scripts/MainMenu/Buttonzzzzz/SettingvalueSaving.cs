@@ -14,6 +14,8 @@ public class SettingvalueSaving : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         music = GameObject.Find(musicName).GetComponent<AudioSource>();
         music.Play();
+        music.volume = volumeValue;
+        music.pitch = musicSpeedValue;
     }
 
     //Methods
@@ -36,6 +38,8 @@ public class SettingvalueSaving : MonoBehaviour
         musicName = name;
         music = GameObject.Find(musicName).GetComponent<AudioSource>();
         music.Play();
+        music.volume = volumeValue;
+        music.pitch = musicSpeedValue;
     }
 
 
