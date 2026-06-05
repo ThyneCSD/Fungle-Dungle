@@ -431,9 +431,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 506405219}
-        m_TargetAssemblyTypeName: ReturnScene, Assembly-CSharp
-        m_MethodName: MainMenuOnClick
+      - m_Target: {fileID: 506405217}
+        m_TargetAssemblyTypeName: SInglePlayerB, Assembly-CSharp
+        m_MethodName: MenuOnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1001,7 +1001,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 506405217}
         m_TargetAssemblyTypeName: SInglePlayerB, Assembly-CSharp
-        m_MethodName: BlackJackOnCLick
+        m_MethodName: BlackJackOnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1134,7 +1134,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 506405217}
         m_TargetAssemblyTypeName: SInglePlayerB, Assembly-CSharp
-        m_MethodName: RacinOnCLick
+        m_MethodName: RacinOnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
