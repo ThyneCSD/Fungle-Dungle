@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 public class SettingvalueSaving : MonoBehaviour
 {
     public float volumeValue = 1;
@@ -11,15 +11,38 @@ public class SettingvalueSaving : MonoBehaviour
     // Start
     void Start()
     {
+        //if (!GameObject.Find("ButtonManager"))
+        
         DontDestroyOnLoad(gameObject);
         music = GameObject.Find(musicName).GetComponent<AudioSource>();
         music.Play();
         music.volume = volumeValue;
         music.pitch = musicSpeedValue;
     }
+    
+    void OnEnable()
+    {
+    SceneManager.sceneLoaded += OnSceneLoaded;
+    }
 
-    //Methods
-    public void VolumeChanged(float vol)
+    void OnDisable()
+    {
+    SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Debug.Log("Loaded: " + scene.name);
+        //DontDestroyOnLoad(gameObject);
+        music = GameObject.Find(musicName).GetComponent<AudioSource>();
+        music.Play();
+        music.volume = volumeValue;
+        music.pitch = musicSpeedValue;
+    }
+
+
+//Methods
+public void VolumeChanged(float vol)
     {
         volumeValue = vol;
         music.volume = volumeValue;
