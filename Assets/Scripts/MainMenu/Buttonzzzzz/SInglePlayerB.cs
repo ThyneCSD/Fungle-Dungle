@@ -8,14 +8,24 @@ public class SInglePlayerB : MonoBehaviour
         SceneManager.LoadScene("SinglePlayerScene");
     }
 
-    public void BlackJackOnCLick()
+    public void BlackJackOnClick()
     {
         SceneManager.LoadScene("BlackJackScene");
     }
 
-    public void RacinOnCLick()
+    public void RacinOnClick()
     {
         SceneManager.LoadScene("RacingScene");
+    }
+
+    public void SettingsOnClick()
+    {
+        SceneManager.LoadScene("Settings_Menu");
+    }
+
+    public void MenuOnClick()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 }
 
