@@ -1,83 +1,152 @@
-using UnityEngine;
+﻿using UnityEngine;
+using TMPro;
 using PlayFab;
 using PlayFab.ClientModels;
 using System.Collections.Generic;
 
 public class OnlineLeaderboard : MonoBehaviour
 {
-    [Header("Player")]
-    public string playerName = "Thyne";
+    [Header("UI INPUT")]
+    [SerializeField] private TMP_InputField nameInput;
+    [SerializeField] private TMP_InputField scoreInput;
 
-    [Header("Debug")]
+    [Header("UI OUTPUT")]
+    [SerializeField] private TextMeshProUGUI leaderboardText;
+
+    [Header("Settings")]
     public bool autoLoginOnStart = true;
 
     private bool loggedIn = false;
+    private bool loginInProgress = false;
+    private string customId;
+
+    void Awake()
+    {
+#if UNITY_EDITOR
+        customId = "EDITOR_TEST_USER" + SystemInfo.deviceUniqueIdentifier;
+#else
+        customId = SystemInfo.deviceUniqueIdentifier;
+#endif
+    }
 
     void Start()
     {
         PlayFabSettings.staticSettings.TitleId = "1C16ED";
 
         if (autoLoginOnStart)
-        {
             Login();
-        }
     }
 
+    // ---------------- LOGIN ----------------
     public void Login()
     {
-#if UNITY_ANDROID
-        var request = new LoginWithAndroidDeviceIDRequest
-        {
-            AndroidDeviceId = SystemInfo.deviceUniqueIdentifier,
-            CreateAccount = true
-        };
+        if (loginInProgress || loggedIn)
+            return;
 
-        PlayFabClientAPI.LoginWithAndroidDeviceID(
-            request,
-            OnLoginSuccess,
-            OnError
-        );
-#else
+        loginInProgress = true;
+
         var request = new LoginWithCustomIDRequest
         {
-            CustomId = SystemInfo.deviceUniqueIdentifier,
+            CustomId = customId,
             CreateAccount = true
         };
 
-        PlayFabClientAPI.LoginWithCustomID(
-            request,
-            OnLoginSuccess,
-            OnError
-        );
-#endif
+        PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnLoginFail);
     }
 
     void OnLoginSuccess(LoginResult result)
     {
+        loginInProgress = false;
         loggedIn = true;
 
-        Debug.Log("PlayFab Login Success!");
+        Debug.Log("✅ Login success");
+    }
 
-        var nameRequest = new UpdateUserTitleDisplayNameRequest
+    void OnLoginFail(PlayFabError error)
+    {
+        loginInProgress = false;
+
+        Debug.LogWarning("❌ Login failed: " + error.ErrorMessage);
+
+        // fallback login
+        var request = new LoginWithCustomIDRequest
         {
-            DisplayName = playerName
+            CustomId = customId,
+            CreateAccount = false
+        };
+
+        PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnError);
+    }
+
+    // ---------------- NAME SYSTEM ----------------
+    public void SetDisplayNameFromInput()
+    {
+        if (!loggedIn)
+        {
+            Debug.LogWarning("❌ Not logged in yet");
+            return;
+        }
+
+        if (nameInput == null)
+        {
+            Debug.LogError("❌ NameInput not assigned in Inspector");
+            return;
+        }
+
+        string newName = nameInput.text.Trim();
+
+        Debug.Log("➡ Trying to set name: " + newName);
+
+        if (string.IsNullOrEmpty(newName))
+        {
+            Debug.LogWarning("❌ Name is empty");
+            return;
+        }
+
+        var request = new UpdateUserTitleDisplayNameRequest
+        {
+            DisplayName = newName
         };
 
         PlayFabClientAPI.UpdateUserTitleDisplayName(
-            nameRequest,
-            r => Debug.Log("Display Name Set: " + playerName),
-            OnError
+            request,
+            result =>
+            {
+                Debug.Log("🔥 NAME SUCCESS: " + newName);
+            },
+            error =>
+            {
+                Debug.LogError("🔥 NAME ERROR: " + error.GenerateErrorReport());
+            }
         );
+    }
+
+    // ---------------- SCORE ----------------
+    public void UploadScoreFromInput()
+    {
+        if (!loggedIn)
+        {
+            Debug.LogWarning("❌ Not logged in yet");
+            return;
+        }
+
+        if (scoreInput == null)
+        {
+            Debug.LogError("❌ ScoreInput not assigned");
+            return;
+        }
+
+        if (!int.TryParse(scoreInput.text, out int score))
+        {
+            Debug.LogWarning("❌ Invalid score");
+            return;
+        }
+
+        UploadScore(score);
     }
 
     public void UploadScore(int score)
     {
-        if (!loggedIn)
-        {
-            Debug.LogWarning("Not logged in yet.");
-            return;
-        }
-
         var request = new UpdatePlayerStatisticsRequest
         {
             Statistics = new List<StatisticUpdate>
@@ -92,16 +161,20 @@ public class OnlineLeaderboard : MonoBehaviour
 
         PlayFabClientAPI.UpdatePlayerStatistics(
             request,
-            result =>
-            {
-                Debug.Log("Score Uploaded: " + score);
-            },
+            result => Debug.Log("🔥 Score uploaded: " + score),
             OnError
         );
     }
 
+    // ---------------- LEADERBOARD ----------------
     public void GetLeaderboard()
     {
+        if (!loggedIn)
+        {
+            Debug.LogWarning("❌ Not logged in yet");
+            return;
+        }
+
         var request = new GetLeaderboardRequest
         {
             StatisticName = "HighScore",
@@ -109,51 +182,47 @@ public class OnlineLeaderboard : MonoBehaviour
             MaxResultsCount = 10
         };
 
-        PlayFabClientAPI.GetLeaderboard(
-            request,
-            OnLeaderboardReceived,
-            OnError
-        );
+        PlayFabClientAPI.GetLeaderboard(request, OnLeaderboardReceived, OnError);
     }
 
     void OnLeaderboardReceived(GetLeaderboardResult result)
     {
-        Debug.Log("===== TOP 10 =====");
+        string output = "===== TOP 10 =====\n\n";
 
         foreach (var player in result.Leaderboard)
         {
-            string displayName =
-                string.IsNullOrEmpty(player.DisplayName)
+            string name = string.IsNullOrEmpty(player.DisplayName)
                 ? "Unknown"
                 : player.DisplayName;
 
-            Debug.Log(
-                "#" +
-                (player.Position + 1) +
-                " | " +
-                displayName +
-                " | " +
-                player.StatValue
-            );
+            output += "#" + (player.Position + 1)
+                + " | " + name
+                + " | " + player.StatValue + "\n";
         }
+
+        if (leaderboardText != null)
+            leaderboardText.text = output;
+
+        Debug.Log(output);
     }
 
+    // ---------------- ERROR ----------------
     void OnError(PlayFabError error)
     {
         Debug.LogError(error.GenerateErrorReport());
     }
 
-    // TEST KNOPPEN IN INSPECTOR
-    [ContextMenu("Upload 100")]
-    public void TestUpload100()
+    // ---------------- DEBUG BUTTONS ----------------
+    [ContextMenu("Set Name")]
+    public void TestSetName()
     {
-        UploadScore(100);
+        SetDisplayNameFromInput();
     }
 
-    [ContextMenu("Upload 1000")]
-    public void TestUpload1000()
+    [ContextMenu("Upload Score")]
+    public void TestScore()
     {
-        UploadScore(1000);
+        UploadScoreFromInput();
     }
 
     [ContextMenu("Get Leaderboard")]
