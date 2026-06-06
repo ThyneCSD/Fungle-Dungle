@@ -1940,7 +1940,7 @@ GameObject:
   - component: {fileID: 1348935001}
   - component: {fileID: 1348935003}
   m_Layer: 0
-  m_Name: Butonmanger
+  m_Name: ButtonManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

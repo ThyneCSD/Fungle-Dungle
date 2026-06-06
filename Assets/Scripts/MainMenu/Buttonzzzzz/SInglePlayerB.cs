@@ -27,6 +27,16 @@ public class SInglePlayerB : MonoBehaviour
     {
         SceneManager.LoadScene("MainMenu");
     }
+
+    public void MultiplayerOnClick()
+    {
+        SceneManager.LoadScene("Multiplayer_Menu");
+    }
+
+    public void ExitClick()
+    {
+        Application.Quit();
+    }
 }
 
 
