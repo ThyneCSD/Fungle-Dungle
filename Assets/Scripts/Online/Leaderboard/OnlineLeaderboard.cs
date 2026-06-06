@@ -8,7 +8,6 @@ public class OnlineLeaderboard : MonoBehaviour
 {
     [Header("UI INPUT")]
     [SerializeField] private TMP_InputField nameInput;
-    [SerializeField] private TMP_InputField scoreInput;
 
     [Header("UI OUTPUT")]
     [SerializeField] private TextMeshProUGUI leaderboardText;
@@ -37,7 +36,6 @@ public class OnlineLeaderboard : MonoBehaviour
             Login();
     }
 
-    // ---------------- LOGIN ----------------
     public void Login()
     {
         if (loginInProgress || loggedIn)
@@ -59,16 +57,15 @@ public class OnlineLeaderboard : MonoBehaviour
         loginInProgress = false;
         loggedIn = true;
 
-        Debug.Log("✅ Login success");
+        Debug.Log("Login success ez as lah");
     }
 
     void OnLoginFail(PlayFabError error)
     {
         loginInProgress = false;
 
-        Debug.LogWarning("❌ Login failed: " + error.ErrorMessage);
+        Debug.LogWarning(" Login FOKING FAILED: " + error.ErrorMessage);
 
-        // fallback login
         var request = new LoginWithCustomIDRequest
         {
             CustomId = customId,
@@ -78,28 +75,27 @@ public class OnlineLeaderboard : MonoBehaviour
         PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnError);
     }
 
-    // ---------------- NAME SYSTEM ----------------
     public void SetDisplayNameFromInput()
     {
         if (!loggedIn)
         {
-            Debug.LogWarning("❌ Not logged in yet");
+            Debug.LogWarning("Not logged in brah");
             return;
         }
 
         if (nameInput == null)
         {
-            Debug.LogError("❌ NameInput not assigned in Inspector");
+            Debug.LogError("NameInput not assigned in Inspector");
             return;
         }
 
         string newName = nameInput.text.Trim();
 
-        Debug.Log("➡ Trying to set name: " + newName);
+        Debug.Log("Trying to set name: " + newName);
 
         if (string.IsNullOrEmpty(newName))
         {
-            Debug.LogWarning("❌ Name is empty");
+            Debug.LogWarning("Name is empty non extiasta");
             return;
         }
 
@@ -121,28 +117,14 @@ public class OnlineLeaderboard : MonoBehaviour
         );
     }
 
-    // ---------------- SCORE ----------------
     public void UploadScoreFromInput()
     {
         if (!loggedIn)
         {
-            Debug.LogWarning("❌ Not logged in yet");
+            Debug.LogWarning("Not logged in brah");
             return;
         }
-
-        if (scoreInput == null)
-        {
-            Debug.LogError("❌ ScoreInput not assigned");
-            return;
-        }
-
-        if (!int.TryParse(scoreInput.text, out int score))
-        {
-            Debug.LogWarning("❌ Invalid score");
-            return;
-        }
-
-        UploadScore(score);
+        UploadScore(GameState.Money);
     }
 
     public void UploadScore(int score)
@@ -166,12 +148,11 @@ public class OnlineLeaderboard : MonoBehaviour
         );
     }
 
-    // ---------------- LEADERBOARD ----------------
     public void GetLeaderboard()
     {
         if (!loggedIn)
         {
-            Debug.LogWarning("❌ Not logged in yet");
+            Debug.LogWarning("Not logged in brah");
             return;
         }
 
@@ -206,13 +187,11 @@ public class OnlineLeaderboard : MonoBehaviour
         Debug.Log(output);
     }
 
-    // ---------------- ERROR ----------------
     void OnError(PlayFabError error)
     {
         Debug.LogError(error.GenerateErrorReport());
     }
 
-    // ---------------- DEBUG BUTTONS ----------------
     [ContextMenu("Set Name")]
     public void TestSetName()
     {

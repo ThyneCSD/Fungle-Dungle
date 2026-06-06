@@ -19,47 +19,47 @@ public class Betting : MonoBehaviour
     {
         if (moneyInput.text == "Hentai")
         {
-            PlayerPrefs.SetInt("Money", 100);
+            GameState.ResetMoney();
         }
     }
 
     public void Bet10()
     {
-        if (PlayerPrefs.GetInt("Money", 0) >= 10)
+        if (GameState.Money >= 10)
         {
             moneyBetted = 10;
-            PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) - 10);
+            GameState.Money -= 10;
             StartGame();
         }
     }
 
     public void Bet20()
     {
-        if (PlayerPrefs.GetInt("Money", 0) >= 20)
+        if (GameState.Money >= 20)
         {
             moneyBetted = 20;
-            PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) - 20);
+            GameState.Money -= 20;
             StartGame();
         }
     }
 
     public void Bet50()
     {
-        if (PlayerPrefs.GetInt("Money", 0) >= 50)
+        if (GameState.Money >= 50)
         {
             moneyBetted = 50;
-            PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) - 50);
+            GameState.Money -= 50;
             StartGame();
         }
     }
 
     public void AllIn()
     {
-        int money = PlayerPrefs.GetInt("Money", 0);
+        int money = GameState.Money;
         if (money > 0)
         {
             moneyBetted = money;
-            PlayerPrefs.SetInt("Money", 0);
+            GameState.Money = 0;
             StartGame();
         }
     }

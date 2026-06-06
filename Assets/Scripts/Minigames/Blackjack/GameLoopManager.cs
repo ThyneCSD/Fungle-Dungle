@@ -21,15 +21,13 @@ public class GameLoopManager : MonoBehaviour
     {
         if (deckManager == null)
             deckManager = FindFirstObjectByType<DeckManager>();
-
-        PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 100));
     }
 
     void Update()
     {
-        moneyText.text = "Money: $" + PlayerPrefs.GetInt("Money");
+        moneyText.text = "Money: $" + GameState.Money;
         loopCheck();
-        Debug.Log(PlayerPrefs.GetInt("Money", 0));
+        Debug.Log(GameState.Money);
     }
 
     private void loopCheck()
@@ -45,15 +43,17 @@ public class GameLoopManager : MonoBehaviour
             gameloopText.text = "Bust! You lose.";
             ReplayButton.SetActive(true);
             canvas.GetComponent<CanvasGroup>().interactable = false;
+            gameEnded = true;
         }
         else if (handValue == 21)
         {
             gameloopText.text = "Blackjack! You win!";
             ReplayButton.SetActive(true);
             canvas.GetComponent<CanvasGroup>().interactable = false;
-            if (gameEnded == false)
+
+            if (!gameEnded)
             {
-                PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) + betting.moneyBetted * 2);
+                GameState.Money += betting.moneyBetted * 2;
                 gameEnded = true;
             }
         }
@@ -63,17 +63,20 @@ public class GameLoopManager : MonoBehaviour
             gameloopText.text = "Dealer busts! You win!";
             ReplayButton.SetActive(true);
             canvas.GetComponent<CanvasGroup>().interactable = false;
-            if (gameEnded == false)
+
+            if (!gameEnded)
             {
-                PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) + betting.moneyBetted * 2);
+                GameState.Money += betting.moneyBetted * 2;
                 gameEnded = true;
             }
         }
+
         if (dealer.CalculateDealerValue() == 21)
         {
             gameloopText.text = "Dealer has Blackjack! You lose!";
             ReplayButton.SetActive(true);
             canvas.GetComponent<CanvasGroup>().interactable = false;
+            gameEnded = true;
         }
     }
 
@@ -82,32 +85,36 @@ public class GameLoopManager : MonoBehaviour
         if (dealer.CalculateDealerValue() < 17)
         {
             dealer.DrawDealerCard();
-        } else
+        }
+        else
         {
             int handValue = deckManager.CalculateHandValue();
             int dealerValue = dealer.CalculateDealerValue();
+
             if (handValue > dealerValue)
             {
                 gameloopText.text = "You win!";
-                if (gameEnded == false)
+                if (!gameEnded)
                 {
-                    PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) + betting.moneyBetted * 2);
+                    GameState.Money += betting.moneyBetted * 2;
                     gameEnded = true;
                 }
             }
             else if (handValue < dealerValue)
             {
                 gameloopText.text = "You lose!";
+                gameEnded = true;
             }
             else
             {
                 gameloopText.text = "It's a tie!";
-                if (gameEnded == false)
+                if (!gameEnded)
                 {
-                    PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) + betting.moneyBetted);
+                    GameState.Money += betting.moneyBetted;
                     gameEnded = true;
                 }
             }
+
             ReplayButton.SetActive(true);
             canvas.GetComponent<CanvasGroup>().interactable = false;
         }
