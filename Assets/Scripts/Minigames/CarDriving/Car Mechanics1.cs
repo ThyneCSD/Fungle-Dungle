@@ -4,6 +4,9 @@ public class CarMechanics1 : MonoBehaviour
 {
     //Customization
     [SerializeField] Rigidbody2D rb;
+    [SerializeField] private ParticleSystem smoke1;
+    [SerializeField] private ParticleSystem smoke2;
+    [SerializeField] private AudioSource brakeSound;
 
     [SerializeField] private float topForwardSpeed = 10f;
     [SerializeField] private float topReverseSpeed = -4f;
@@ -21,6 +24,7 @@ public class CarMechanics1 : MonoBehaviour
     private float acceleration = 0;
     private float rotationSpeedMultiplier = 1;
 
+    private bool braking = false;
 
     void Start()
     {
@@ -49,12 +53,34 @@ public class CarMechanics1 : MonoBehaviour
             //forwardVelocity = 5;
             //forwardVelocity += accelerationIncrease;
             forwardVelocity += (topForwardSpeed - forwardVelocity) * (AccelerationValue * accelerationIncrease) * Time.deltaTime;
-
+            //SFX
 
         }
-        else if (AccelerationValue < -1)
+        else if (AccelerationValue < 0)
         {
-            forwardVelocity += (topReverseSpeed - forwardVelocity) * (AccelerationValue * accelerationDecrease) * Time.deltaTime;
+            //forwardVelocity += (topReverseSpeed - forwardVelocity) * (AccelerationValue * accelerationDecrease) * Time.deltaTime;
+            if (forwardVelocity > 0)
+            {
+                // Brake
+                forwardVelocity = Mathf.MoveTowards(
+                    forwardVelocity,
+                    0f,
+                    -AccelerationValue * 10f * Time.deltaTime
+                );
+                braking = true;
+                
+
+                //SFX
+            }
+            else
+            {
+                // Reverse
+                forwardVelocity += (topReverseSpeed - forwardVelocity)
+                                 * (-AccelerationValue)
+                                 * accelerationDecrease
+                                 * Time.deltaTime;
+                //SFX
+            }
         }
         else
         {
@@ -80,6 +106,27 @@ public class CarMechanics1 : MonoBehaviour
              */
 
         }
+
+        if (braking == true)
+        {
+            if (forwardVelocity > 0 && AccelerationValue < 0)
+            {
+                smoke1.Play(); smoke2.Play();
+                smoke1.startSpeed = forwardVelocity / 10; smoke2.startSpeed = forwardVelocity / 10;
+                if(brakeSound.isPlaying == false)
+                { brakeSound.Play(); }
+                brakeSound.volume =  -1 * AccelerationValue * forwardVelocity / 10;
+                
+            }
+            else
+            {
+                smoke1.Stop(); smoke2.Stop();
+                brakeSound.Stop();
+                braking = false;
+
+            }
+        }
+
         /*
         else if (forwardVelocity > 0)
         {
@@ -166,6 +213,9 @@ public class CarMechanics1 : MonoBehaviour
             rb.angularVelocity = 0; 
         }
         */
+
+
+
     }
 }
 
