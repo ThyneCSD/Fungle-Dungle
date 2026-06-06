@@ -1,9 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 using PlayFab;
 using PlayFab.ClientModels;
 using System.Collections.Generic;
 using System.Text;
+using System.Collections;
 
 public class PlayFabChatRoom : MonoBehaviour
 {
@@ -14,13 +16,18 @@ public class PlayFabChatRoom : MonoBehaviour
     [Header("UI OUTPUT")]
     [SerializeField] private TextMeshProUGUI chatText;
 
-    [Header("Settings")]
+    [Header("JUMPSCARE")]
+    [SerializeField] private RawImage jumpscareImage;
+    [SerializeField] private AudioSource jumpscareSound;
+
+    [Header("SETTINGS")]
     [SerializeField] private string sharedGroupId = "GLOBAL_CHAT_ROOM";
     [SerializeField] private float refreshInterval = 3f;
     [SerializeField] private int maxMessages = 20;
 
     private bool loggedIn;
     private bool joinedGroup;
+    private bool isJumpscaring;
     private float timer;
     private string customId;
 
@@ -37,6 +44,10 @@ public class PlayFabChatRoom : MonoBehaviour
     {
         PlayFabSettings.staticSettings.TitleId = "1C16ED";
         Login();
+
+        SetJumpscareAlpha(0f);
+        if (jumpscareImage != null)
+            jumpscareImage.gameObject.SetActive(false);
     }
 
     void Update()
@@ -44,6 +55,7 @@ public class PlayFabChatRoom : MonoBehaviour
         if (!loggedIn || !joinedGroup) return;
 
         timer += Time.deltaTime;
+
         if (timer >= refreshInterval)
         {
             timer = 0;
@@ -66,7 +78,6 @@ public class PlayFabChatRoom : MonoBehaviour
             {
                 loggedIn = true;
                 Debug.Log("Login success");
-
                 EnsureGroupExists();
             },
             OnError);
@@ -74,25 +85,22 @@ public class PlayFabChatRoom : MonoBehaviour
 
     #endregion
 
-    #region GROUP SETUP
+    #region GROUP
 
     void EnsureGroupExists()
     {
-        var createRequest = new CreateSharedGroupRequest
+        var request = new CreateSharedGroupRequest
         {
             SharedGroupId = sharedGroupId
         };
 
-        PlayFabClientAPI.CreateSharedGroup(createRequest,
-            result =>
+        PlayFabClientAPI.CreateSharedGroup(request,
+            r =>
             {
-                Debug.Log("Group created");
                 AddSelfToGroup();
             },
-            error =>
+            e =>
             {
-                // If it already exists, we still continue
-                Debug.Log("Group already exists or cannot be created, continuing...");
                 AddSelfToGroup();
             });
     }
@@ -102,18 +110,13 @@ public class PlayFabChatRoom : MonoBehaviour
         var request = new AddSharedGroupMembersRequest
         {
             SharedGroupId = sharedGroupId,
-            PlayFabIds = new List<string>
-            {
-                PlayFabSettings.staticPlayer.PlayFabId
-            }
+            PlayFabIds = new List<string> { PlayFabSettings.staticPlayer.PlayFabId }
         };
 
         PlayFabClientAPI.AddSharedGroupMembers(request,
-            result =>
+            r =>
             {
                 joinedGroup = true;
-                Debug.Log("Joined shared group");
-
                 RefreshChat();
             },
             OnError);
@@ -121,7 +124,7 @@ public class PlayFabChatRoom : MonoBehaviour
 
     #endregion
 
-    #region SEND MESSAGE
+    #region SEND
 
     public void SendMessage()
     {
@@ -177,7 +180,7 @@ public class PlayFabChatRoom : MonoBehaviour
 
     #endregion
 
-    #region REFRESH CHAT
+    #region REFRESH + SECRET
 
     public void RefreshChat()
     {
@@ -190,13 +193,40 @@ public class PlayFabChatRoom : MonoBehaviour
         result =>
         {
             StringBuilder sb = new StringBuilder();
+            bool triggerJumpscare = false;
 
             if (result.Data != null && result.Data.ContainsKey("CHAT"))
             {
                 var data = JsonUtility.FromJson<ChatWrapper>(result.Data["CHAT"].Value);
 
-                foreach (var msg in data.messages)
+                List<string> cleanedMessages = new List<string>();
+
+                foreach (string msg in data.messages)
+                {
+                    if (msg.ToLower().Contains("scary tree"))
+                    {
+                        triggerJumpscare = true;
+                        continue; // ❌ remove it from chat
+                    }
+
+                    cleanedMessages.Add(msg);
                     sb.AppendLine(msg);
+                }
+
+                // 🔥 overwrite chat WITHOUT trigger message
+                if (triggerJumpscare)
+                {
+                    string json = JsonUtility.ToJson(new ChatWrapper { messages = cleanedMessages });
+
+                    PlayFabClientAPI.UpdateSharedGroupData(new UpdateSharedGroupDataRequest
+                    {
+                        SharedGroupId = sharedGroupId,
+                        Data = new Dictionary<string, string>
+                        {
+                        { "CHAT", json }
+                        }
+                    }, null, OnError);
+                }
             }
             else
             {
@@ -205,8 +235,53 @@ public class PlayFabChatRoom : MonoBehaviour
 
             if (chatText != null)
                 chatText.text = sb.ToString();
+
+            if (triggerJumpscare)
+            {
+                StartCoroutine(PlayJumpscare());
+            }
         },
         OnError);
+    }
+
+    #endregion
+
+    #region JUMPSCARE
+
+    IEnumerator PlayJumpscare()
+    {
+        if (isJumpscaring) yield break;
+        isJumpscaring = true;
+
+        jumpscareImage.gameObject.SetActive(true);
+        SetJumpscareAlpha(1f);
+
+        if (jumpscareSound != null)
+            jumpscareSound.Play();
+
+        yield return new WaitForSeconds(0.5f);
+
+        float t = 0f;
+        float duration = 1.2f;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            SetJumpscareAlpha(Mathf.Lerp(1f, 0f, t / duration));
+            yield return null;
+        }
+
+        SetJumpscareAlpha(0f);
+        jumpscareImage.gameObject.SetActive(false);
+
+        isJumpscaring = false;
+    }
+
+    void SetJumpscareAlpha(float a)
+    {
+        Color c = jumpscareImage.color;
+        c.a = a;
+        jumpscareImage.color = c;
     }
 
     #endregion
@@ -215,7 +290,7 @@ public class PlayFabChatRoom : MonoBehaviour
 
     void OnError(PlayFabError error)
     {
-        Debug.LogError("PlayFab Error: " + error.GenerateErrorReport());
+        Debug.LogError(error.GenerateErrorReport());
     }
 
     #endregion
