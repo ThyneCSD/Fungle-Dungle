@@ -5,6 +5,7 @@ public class GameLoopManager : MonoBehaviour
 {
     [SerializeField] private DeckManager deckManager;
     [SerializeField] private Dealer dealer;
+    [SerializeField] private Betting betting;
     [SerializeField] private TextMeshProUGUI handValueText;
     [SerializeField] private TextMeshProUGUI dealerValueText;
     [SerializeField] private TextMeshProUGUI gameloopText;
@@ -14,17 +15,21 @@ public class GameLoopManager : MonoBehaviour
 
     [SerializeField] private GameObject canvas;
 
+    public bool gameEnded = false;
+
     void Start()
     {
         if (deckManager == null)
             deckManager = FindFirstObjectByType<DeckManager>();
 
-        moneyText.text = "Money: $" + PlayerPrefs.GetInt("Money", 100);
+        PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 100));
     }
 
     void Update()
     {
+        moneyText.text = "Money: $" + PlayerPrefs.GetInt("Money");
         loopCheck();
+        Debug.Log(PlayerPrefs.GetInt("Money", 0));
     }
 
     private void loopCheck()
@@ -46,6 +51,11 @@ public class GameLoopManager : MonoBehaviour
             gameloopText.text = "Blackjack! You win!";
             ReplayButton.SetActive(true);
             canvas.GetComponent<CanvasGroup>().interactable = false;
+            if (gameEnded == false)
+            {
+                PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) + betting.moneyBetted * 2);
+                gameEnded = true;
+            }
         }
 
         if (dealer.CalculateDealerValue() > 21)
@@ -53,6 +63,11 @@ public class GameLoopManager : MonoBehaviour
             gameloopText.text = "Dealer busts! You win!";
             ReplayButton.SetActive(true);
             canvas.GetComponent<CanvasGroup>().interactable = false;
+            if (gameEnded == false)
+            {
+                PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) + betting.moneyBetted * 2);
+                gameEnded = true;
+            }
         }
         if (dealer.CalculateDealerValue() == 21)
         {
@@ -74,6 +89,11 @@ public class GameLoopManager : MonoBehaviour
             if (handValue > dealerValue)
             {
                 gameloopText.text = "You win!";
+                if (gameEnded == false)
+                {
+                    PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) + betting.moneyBetted * 2);
+                    gameEnded = true;
+                }
             }
             else if (handValue < dealerValue)
             {
@@ -82,6 +102,11 @@ public class GameLoopManager : MonoBehaviour
             else
             {
                 gameloopText.text = "It's a tie!";
+                if (gameEnded == false)
+                {
+                    PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) + betting.moneyBetted);
+                    gameEnded = true;
+                }
             }
             ReplayButton.SetActive(true);
             canvas.GetComponent<CanvasGroup>().interactable = false;
