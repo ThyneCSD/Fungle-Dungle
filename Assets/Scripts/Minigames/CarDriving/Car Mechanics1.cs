@@ -1,3 +1,4 @@
+using Unity.Jobs;
 using UnityEngine;
 
 public class CarMechanics1 : MonoBehaviour
@@ -7,6 +8,7 @@ public class CarMechanics1 : MonoBehaviour
     [SerializeField] private ParticleSystem smoke1;
     [SerializeField] private ParticleSystem smoke2;
     [SerializeField] private AudioSource brakeSound;
+    [SerializeField] private AudioSource AccelerationSound;
 
     [SerializeField] private float topForwardSpeed = 10f;
     [SerializeField] private float topReverseSpeed = -4f;
@@ -25,6 +27,7 @@ public class CarMechanics1 : MonoBehaviour
     private float rotationSpeedMultiplier = 1;
 
     private bool braking = false;
+    private bool accelerating = false;
 
     void Start()
     {
@@ -54,7 +57,7 @@ public class CarMechanics1 : MonoBehaviour
             //forwardVelocity += accelerationIncrease;
             forwardVelocity += (topForwardSpeed - forwardVelocity) * (AccelerationValue * accelerationIncrease) * Time.deltaTime;
             //SFX
-
+            accelerating = true;
         }
         else if (AccelerationValue < 0)
         {
@@ -69,8 +72,6 @@ public class CarMechanics1 : MonoBehaviour
                 );
                 braking = true;
                 
-
-                //SFX
             }
             else
             {
@@ -79,6 +80,7 @@ public class CarMechanics1 : MonoBehaviour
                                  * (-AccelerationValue)
                                  * accelerationDecrease
                                  * Time.deltaTime;
+                accelerating = true;
                 //SFX
             }
         }
@@ -126,6 +128,30 @@ public class CarMechanics1 : MonoBehaviour
 
             }
         }
+        if (accelerating == true)
+        {
+
+            if (braking == true || AccelerationValue == 0)
+            {
+                accelerating = false;
+                AccelerationSound.Stop();
+            }
+            else
+            {
+                if (AccelerationSound.isPlaying == false)
+                { AccelerationSound.Play(); }
+
+                if (AccelerationValue > 0)
+                {
+                    AccelerationSound.volume = AccelerationValue;
+                }
+                else
+                {
+                    AccelerationSound.volume = -1 * AccelerationValue;
+                }
+            }
+        }
+
 
         /*
         else if (forwardVelocity > 0)
