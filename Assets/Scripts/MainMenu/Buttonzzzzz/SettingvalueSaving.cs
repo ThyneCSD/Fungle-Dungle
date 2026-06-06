@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 public class SettingvalueSaving : MonoBehaviour
 {
+    public static SettingvalueSaving Instance;
+
     public float volumeValue = 1;
     public float musicSpeedValue = 2;
     public string musicName = "Music1";
@@ -9,11 +11,25 @@ public class SettingvalueSaving : MonoBehaviour
 
 
     // Start
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        Debug.Log("ButtonManager created");
+    }
+
     void Start()
     {
         //if (!GameObject.Find("ButtonManager"))
         
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
         music = GameObject.Find(musicName).GetComponent<AudioSource>();
         music.Play();
         music.volume = volumeValue;
@@ -29,7 +45,7 @@ public class SettingvalueSaving : MonoBehaviour
     {
     SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-
+    /*
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         Debug.Log("Loaded: " + scene.name);
@@ -39,10 +55,19 @@ public class SettingvalueSaving : MonoBehaviour
         music.volume = volumeValue;
         music.pitch = musicSpeedValue;
     }
+    */
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Slider volumeSlider = GameObject.Find("VolumeSlider")
+                                        .GetComponent<Slider>();
 
+        volumeSlider.onValueChanged.RemoveAllListeners();
+        volumeSlider.onValueChanged.AddListener(VolumeChanged);
 
-//Methods
-public void VolumeChanged(float vol)
+        volumeSlider.value = volumeValue;
+    }
+    //Methods
+    public void VolumeChanged(float vol)
     {
         volumeValue = vol;
         music.volume = volumeValue;
