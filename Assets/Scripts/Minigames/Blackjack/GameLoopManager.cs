@@ -8,6 +8,7 @@ public class GameLoopManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI handValueText;
     [SerializeField] private TextMeshProUGUI dealerValueText;
     [SerializeField] private TextMeshProUGUI gameloopText;
+    [SerializeField] private TextMeshProUGUI moneyText;
 
     [SerializeField] private GameObject ReplayButton;
 
@@ -17,6 +18,8 @@ public class GameLoopManager : MonoBehaviour
     {
         if (deckManager == null)
             deckManager = FindFirstObjectByType<DeckManager>();
+
+        moneyText.text = "Money: $" + PlayerPrefs.GetInt("Money", 100);
     }
 
     void Update()

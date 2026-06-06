@@ -153,7 +153,7 @@ public class OnlineLeaderboard : MonoBehaviour
             {
                 new StatisticUpdate
                 {
-                    StatisticName = "HighScore",
+                    StatisticName = "HighScore2",
                     Value = score
                 }
             }
@@ -177,7 +177,7 @@ public class OnlineLeaderboard : MonoBehaviour
 
         var request = new GetLeaderboardRequest
         {
-            StatisticName = "HighScore",
+            StatisticName = "HighScore2",
             StartPosition = 0,
             MaxResultsCount = 10
         };
