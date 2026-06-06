@@ -12,4 +12,9 @@ public class ReturnScene : MonoBehaviour
     {
         SceneManager.LoadScene("MainMenu");
     }
+
+    public void ChatRoomOnClick()
+    {
+        SceneManager.LoadScene("ChatRoom");
+    }
 }
