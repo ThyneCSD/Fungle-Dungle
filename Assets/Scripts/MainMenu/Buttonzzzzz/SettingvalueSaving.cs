@@ -45,7 +45,7 @@ public class SettingvalueSaving : MonoBehaviour
     {
     SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-    /*
+    
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         Debug.Log("Loaded: " + scene.name);
@@ -55,17 +55,8 @@ public class SettingvalueSaving : MonoBehaviour
         music.volume = volumeValue;
         music.pitch = musicSpeedValue;
     }
-    */
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        Slider volumeSlider = GameObject.Find("VolumeSlider")
-                                        .GetComponent<Slider>();
-
-        volumeSlider.onValueChanged.RemoveAllListeners();
-        volumeSlider.onValueChanged.AddListener(VolumeChanged);
-
-        volumeSlider.value = volumeValue;
-    }
+    
+    
     //Methods
     public void VolumeChanged(float vol)
     {
