@@ -5,6 +5,7 @@ public class Betting : MonoBehaviour
 {
     [SerializeField] private GameObject canvasGameUI;
     [SerializeField] private GameObject canvasBettingUI;
+    [SerializeField] private TMP_InputField codeInput;
     [SerializeField] private TMP_InputField moneyInput;
 
     public int moneyBetted;
@@ -17,7 +18,7 @@ public class Betting : MonoBehaviour
 
     private void Update()
     {
-        if (moneyInput.text == "Hentai")
+        if (codeInput.text == "Hentai")
         {
             GameState.ResetMoney();
         }
@@ -61,6 +62,21 @@ public class Betting : MonoBehaviour
             moneyBetted = money;
             GameState.Money = 0;
             StartGame();
+        }
+    }
+
+    public void BetCustom()
+    {
+        int bet;
+
+        if (int.TryParse(moneyInput.text, out bet))
+        {
+            if (bet > 0 && GameState.Money >= bet)
+            {
+                moneyBetted = bet;
+                GameState.Money -= bet;
+                StartGame();
+            }
         }
     }
 }

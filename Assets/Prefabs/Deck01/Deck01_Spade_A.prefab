@@ -139,6 +139,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardData
   cardName: Ace
   cardValue: 11
+  isAce: 1
 --- !u!1 &3618005784735214023
 GameObject:
   m_ObjectHideFlags: 0

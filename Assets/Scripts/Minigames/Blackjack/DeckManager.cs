@@ -99,15 +99,29 @@ public class DeckManager : MonoBehaviour
     public int CalculateHandValue()
     {
         int total = 0;
+        int aceCount = 0;
 
         foreach (GameObject card in handCards)
         {
             CardData data = card.GetComponent<CardData>();
 
-            if (data != null)
+            if (data == null) continue;
+
+            if (data.isAce)
+            {
+                aceCount++;
+                total += 11;
+            }
+            else
             {
                 total += data.cardValue;
             }
+        }
+
+        while (total > 21 && aceCount > 0)
+        {
+            total -= 10;
+            aceCount--;
         }
 
         return total;

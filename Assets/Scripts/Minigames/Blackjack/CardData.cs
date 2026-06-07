@@ -7,4 +7,6 @@ public class CardData : MonoBehaviour
 
     [Range(1, 11)]
     public int cardValue = 1;
+
+    public bool isAce;
 }
