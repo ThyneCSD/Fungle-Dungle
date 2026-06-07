@@ -15,23 +15,39 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
     [Header("UI OUTPUT")]
     [SerializeField] private TextMeshProUGUI chatText;
 
-    [Header("JUMPSCARE")]
-    [SerializeField] private RawImage jumpscareImage;
-    [SerializeField] private AudioSource jumpscareSound;
+    [Header("SPECIAL IMAGES")]
+    [SerializeField] private RawImage scaryTreeImage;
+    [SerializeField] private RawImage danielImage;
+    [SerializeField] private RawImage fortniteImage;
+
+    [Header("SPECIAL SOUNDS")]
+    [SerializeField] private AudioSource scaryTreeSound;
+    [SerializeField] private AudioSource danielSound;
+    [SerializeField] private AudioSource fortniteSound;
+
+    [Header("EFFECT SETTINGS")]
+    [SerializeField] private float effectDuration = 1f;
+    [SerializeField] private float fortniteDelay = 1f;
 
     [Header("SETTINGS")]
     [SerializeField] private string roomName = "MainRoom";
     [SerializeField] private int maxMessages = 20;
 
     private bool isConnected;
-    private bool isScaring;
+    private bool isShowingEffect;
 
     private List<string> messages = new List<string>();
 
     void Start()
     {
-        if (jumpscareImage != null)
-            jumpscareImage.gameObject.SetActive(false);
+        if (scaryTreeImage != null)
+            scaryTreeImage.gameObject.SetActive(false);
+
+        if (danielImage != null)
+            danielImage.gameObject.SetActive(false);
+
+        if (fortniteImage != null)
+            fortniteImage.gameObject.SetActive(false);
 
         Connect();
     }
@@ -61,10 +77,13 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
 
     public void SendMessage()
     {
-        if (!isConnected) return;
-        if (string.IsNullOrWhiteSpace(messageInput.text)) return;
+        if (!isConnected)
+            return;
 
-        string name = string.IsNullOrWhiteSpace(nameInput.text)
+        if (string.IsNullOrWhiteSpace(messageInput.text))
+            return;
+
+        string playerName = string.IsNullOrWhiteSpace(nameInput.text)
             ? "Anonymous"
             : nameInput.text.Trim();
 
@@ -74,11 +93,11 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
         if (input.ToLower() == "!time")
         {
             string time = System.DateTime.Now.ToString("HH:mm:ss");
-            msg = $"[{name}] 🕒 {time}";
+            msg = $"[{playerName}] 🕒 {time}";
         }
         else
         {
-            msg = $"[{name}] {input}";
+            msg = $"[{playerName}] {input}";
         }
 
         photonView.RPC("ReceiveMessage", RpcTarget.All, msg);
@@ -89,9 +108,15 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
     [PunRPC]
     void ReceiveMessage(string msg)
     {
-        bool isScaryTree = msg.ToLower().Contains("scary tree");
+        string lower = msg.ToLower();
 
-        if (!isScaryTree)
+        bool special =
+            lower.Contains("scary tree") ||
+            lower.Contains("daniel") ||
+            lower.Contains("fortnite");
+
+        // Alleen normale berichten in de chat tonen
+        if (!special)
         {
             messages.Add(msg);
 
@@ -101,9 +126,17 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
 
         RefreshChat();
 
-        if (isScaryTree)
+        if (lower.Contains("scary tree"))
         {
-            StartCoroutine(Scare());
+            StartCoroutine(ShowEffect(scaryTreeImage, scaryTreeSound, 0f));
+        }
+        else if (lower.Contains("daniel"))
+        {
+            StartCoroutine(ShowEffect(danielImage, danielSound, 0f));
+        }
+        else if (lower.Contains("fortnite"))
+        {
+            StartCoroutine(ShowEffect(fortniteImage, fortniteSound, fortniteDelay));
         }
     }
 
@@ -113,27 +146,35 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
             chatText.text = string.Join("\n", messages);
     }
 
-    IEnumerator Scare()
+    IEnumerator ShowEffect(RawImage image, AudioSource sound, float delay)
     {
-        if (isScaring) yield break;
-        isScaring = true;
+        if (isShowingEffect)
+            yield break;
 
-        if (jumpscareImage != null)
+        isShowingEffect = true;
+
+        // Geluid direct afspelen
+        if (sound != null)
+            sound.Play();
+
+        // Alleen de afbeelding uitstellen
+        if (delay > 0f)
+            yield return new WaitForSeconds(delay);
+
+        if (image != null)
         {
-            jumpscareImage.gameObject.SetActive(true);
+            image.gameObject.SetActive(true);
 
-            Color c = jumpscareImage.color;
+            Color c = image.color;
             c.a = 1f;
-            jumpscareImage.color = c;
+            image.color = c;
         }
 
-        jumpscareSound?.Play();
+        yield return new WaitForSeconds(effectDuration);
 
-        yield return new WaitForSeconds(1f);
+        if (image != null)
+            image.gameObject.SetActive(false);
 
-        if (jumpscareImage != null)
-            jumpscareImage.gameObject.SetActive(false);
-
-        isScaring = false;
+        isShowingEffect = false;
     }
 }
