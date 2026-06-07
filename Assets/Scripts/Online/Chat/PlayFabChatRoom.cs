@@ -36,7 +36,6 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
         Connect();
     }
 
-    // ---------------- CONNECT ----------------
     void Connect()
     {
         PhotonNetwork.ConnectUsingSettings();
@@ -60,7 +59,6 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
         Debug.Log("Joined Room: " + roomName);
     }
 
-    // ---------------- SEND MESSAGE ----------------
     public void SendMessage()
     {
         if (!isConnected) return;
@@ -73,7 +71,6 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
         string input = messageInput.text.Trim();
         string msg;
 
-        // ---------------- COMMAND: !time ----------------
         if (input.ToLower() == "!time")
         {
             string time = System.DateTime.Now.ToString("HH:mm:ss");
@@ -89,13 +86,11 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
         messageInput.text = "";
     }
 
-    // ---------------- RECEIVE MESSAGE ----------------
     [PunRPC]
     void ReceiveMessage(string msg)
     {
         bool isScaryTree = msg.ToLower().Contains("scary tree");
 
-        // ❌ NIET tonen in chat als het de trigger is
         if (!isScaryTree)
         {
             messages.Add(msg);
@@ -106,21 +101,18 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
 
         RefreshChat();
 
-        // ✅ maar wel jumpscare triggeren
         if (isScaryTree)
         {
             StartCoroutine(Scare());
         }
     }
 
-    // ---------------- UI UPDATE ----------------
     void RefreshChat()
     {
         if (chatText != null)
             chatText.text = string.Join("\n", messages);
     }
 
-    // ---------------- JUMPSCARE ----------------
     IEnumerator Scare()
     {
         if (isScaring) yield break;
