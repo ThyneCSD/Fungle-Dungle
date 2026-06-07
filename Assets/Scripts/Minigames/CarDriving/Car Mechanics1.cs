@@ -10,6 +10,7 @@ public class CarMechanics1 : MonoBehaviour
     [SerializeField] private ParticleSystem smoke2;
     [SerializeField] private AudioSource brakeSound;
     [SerializeField] private AudioSource AccelerationSound;
+    [SerializeField] private AudioSource nitroSound;
 
     [SerializeField] private float topForwardSpeed = 10f;
     [SerializeField] private float topReverseSpeed = -4f;
@@ -74,12 +75,13 @@ public class CarMechanics1 : MonoBehaviour
         {
             //
             //BOOST VFX en SFX
-            //
-            //OH JA EN CONSTANTE LIL ENGINA SOUND OFZ
+            
+            
             if (boostgiven == false)
             {
                 forwardVelocity = topForwardSpeed * boostMultiplier;
                 boostgiven = true;
+                nitroSound.Play();
             }
 
 
