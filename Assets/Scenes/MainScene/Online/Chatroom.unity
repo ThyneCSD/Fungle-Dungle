@@ -2157,7 +2157,7 @@ MonoBehaviour:
   jumpscareImage: {fileID: 1153808196}
   jumpscareSound: {fileID: 570509001}
   roomName: MainRoom
-  maxMessages: 20
+  maxMessages: 10
 --- !u!114 &1339176975
 MonoBehaviour:
   m_ObjectHideFlags: 0
