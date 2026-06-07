@@ -1,3 +1,4 @@
+using TMPro;
 using Unity.Jobs;
 using UnityEngine;
 
@@ -28,6 +29,10 @@ public class CarMechanics1 : MonoBehaviour
 
     private bool braking = false;
     private bool accelerating = false;
+    private bool boosting = false;
+    private bool boostgiven = false;
+
+    public float boostMultiplier = 2f;
 
     void Start()
     {
@@ -45,12 +50,62 @@ public class CarMechanics1 : MonoBehaviour
 
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+
+        if (collision.gameObject.CompareTag("Boost"))
+        {
+            boosting = true;
+        }
+
+    }
+
     // Update is called once per frame
     void Update()
     {
         Debug.Log($"AccelerationValue = {AccelerationValue}");
         Debug.Log(forwardVelocity);
+
+
+        
+
         //Forwardmovement
+        if (boosting == true)
+        {
+            //
+            //BOOST VFX en SFX
+            //
+            //OH JA EN CONSTANTE LIL ENGINA SOUND OFZ
+            if (boostgiven == false)
+            {
+                forwardVelocity = topForwardSpeed * boostMultiplier;
+                boostgiven = true;
+            }
+
+
+
+            if (rotationalVelocity > 0)
+            {
+                forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, rotationalVelocity * 15 * frictionVelocityDecrease * Time.deltaTime);
+            }
+            else if (rotationalVelocity < 0)
+            {
+                forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, -rotationalVelocity * 15 * frictionVelocityDecrease * Time.deltaTime);
+            }
+            else
+            {
+                forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, frictionVelocityDecrease * 10 * Time.deltaTime);
+            }
+
+
+            if (forwardVelocity <= topForwardSpeed)
+            { 
+                boosting = false;
+                boostgiven = false;
+            }
+        }
+        else
+        { 
         if (AccelerationValue > 0)
         {
             //forwardVelocity = 5;
@@ -71,7 +126,7 @@ public class CarMechanics1 : MonoBehaviour
                     -AccelerationValue * 10f * Time.deltaTime
                 );
                 braking = true;
-                
+
             }
             else
             {
@@ -97,7 +152,7 @@ public class CarMechanics1 : MonoBehaviour
             else
             {
                 forwardVelocity = Mathf.MoveTowards(forwardVelocity, 0f, frictionVelocityDecrease * Time.deltaTime);
-            
+
             }
             /*
              *
@@ -108,7 +163,14 @@ public class CarMechanics1 : MonoBehaviour
              */
 
         }
+        }
 
+
+
+
+
+
+        //effects
         if (braking == true)
         {
             if (forwardVelocity > 0 && AccelerationValue < 0)
@@ -185,6 +247,7 @@ public class CarMechanics1 : MonoBehaviour
         //1 is dan forwardvelocity
         //rb.linearVelocity = new Vector2(0, forwardVelocity);
 
+        /*
         if (forwardVelocity > topForwardSpeed)
         {
             forwardVelocity = topForwardSpeed;
@@ -194,6 +257,12 @@ public class CarMechanics1 : MonoBehaviour
         {
             forwardVelocity = topReverseSpeed;
         }
+        */
+
+
+
+        //put acceleration to actual movement
+
 
 
 
@@ -202,9 +271,16 @@ public class CarMechanics1 : MonoBehaviour
 
         //float speedFactor = Mathf.InverseLerp(0f, 2f, Mathf.Abs(forwardVelocity));
 
-        float speedPercent = Mathf.Abs(forwardVelocity) / topForwardSpeed;
-        float steeringMultiplier = 1f - 0.5f * speedPercent * speedPercent;
 
+
+
+
+        //rotation
+        //float speedPercent = Mathf.Abs(forwardVelocity) / topForwardSpeed;
+        //float steeringMultiplier = 1f - 0.5f * speedPercent * speedPercent;
+
+        float speedPercent = Mathf.Abs(forwardVelocity) / topForwardSpeed;
+        float steeringMultiplier = Mathf.Lerp(1f, 0.6f, speedPercent);
 
 
         if (forwardVelocity > 0)
