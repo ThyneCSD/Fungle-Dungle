@@ -33,6 +33,11 @@ public class SInglePlayerB : MonoBehaviour
         SceneManager.LoadScene("Multiplayer_Menu");
     }
 
+    public void SpaceOnClick()
+    {
+        SceneManager.LoadScene("SpaceScene");
+    }
+
     public void ExitClick()
     {
         Application.Quit();

@@ -29,6 +29,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MainScene/Online/Chatroom.unity
     guid: 2f3bc53e53e4b82479457520ea2b8c41
+  - enabled: 1
+    path: Assets/Scenes/MainScene/MiniGames/SpaceScene.unity
+    guid: 54d03a7c1952df547ac752c5c6653918
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
