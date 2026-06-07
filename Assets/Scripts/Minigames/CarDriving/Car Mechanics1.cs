@@ -276,22 +276,26 @@ public class CarMechanics1 : MonoBehaviour
 
 
         //rotation
-        //float speedPercent = Mathf.Abs(forwardVelocity) / topForwardSpeed;
-        //float steeringMultiplier = 1f - 0.5f * speedPercent * speedPercent;
-
         float speedPercent = Mathf.Abs(forwardVelocity) / topForwardSpeed;
-        float steeringMultiplier = Mathf.Lerp(1f, 0.6f, speedPercent);
+        float steeringMultiplier2 = 1f - 0.5f * speedPercent * speedPercent;
+        float steeringMultiplier1 = Mathf.Lerp(1f, 0.6f, speedPercent);
 
+        //float steeringMultiplier = (steeringMultiplier2 + steeringMultiplier1) / 2;
+
+        if (boosting == true)
+        { 
+            steeringMultiplier1 = Mathf.Lerp(1f, 0.9f, speedPercent);
+        }
 
         if (forwardVelocity > 0)
         {
             // Forwards: Normal steering that fades in at low speeds
-            rb.angularVelocity = rotationalVelocity * baseTurnSpeed * steeringMultiplier;
+            rb.angularVelocity = rotationalVelocity * baseTurnSpeed * steeringMultiplier1;
         }
         else if (forwardVelocity < 0)
         {
             // Backwards: Inverted steering that also fades in smoothly
-            rb.angularVelocity = rotationalVelocity * -baseTurnSpeed * steeringMultiplier;
+            rb.angularVelocity = rotationalVelocity * -baseTurnSpeed * steeringMultiplier1;
         }
         else
         {
