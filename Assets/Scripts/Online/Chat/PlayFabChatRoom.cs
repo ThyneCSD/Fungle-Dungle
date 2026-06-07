@@ -1,13 +1,12 @@
-﻿using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
-using PlayFab;
-using PlayFab.ClientModels;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Collections;
+using Photon.Pun;
+using Photon.Realtime;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
-public class PlayFabChatRoom : MonoBehaviour
+public class PhotonChatRoom : MonoBehaviourPunCallbacks
 {
     [Header("UI INPUT")]
     [SerializeField] private TMP_InputField messageInput;
@@ -21,283 +20,128 @@ public class PlayFabChatRoom : MonoBehaviour
     [SerializeField] private AudioSource jumpscareSound;
 
     [Header("SETTINGS")]
-    [SerializeField] private string sharedGroupId = "GLOBAL_CHAT_ROOM";
-    [SerializeField] private float refreshInterval = 3f;
+    [SerializeField] private string roomName = "MainRoom";
     [SerializeField] private int maxMessages = 20;
 
-    private bool loggedIn;
-    private bool joinedGroup;
-    private bool isJumpscaring;
-    private float timer;
-    private string customId;
+    private bool isConnected;
+    private bool isScaring;
 
-    void Awake()
-    {
-#if UNITY_EDITOR
-        customId = "EDITOR_USER_" + SystemInfo.deviceUniqueIdentifier;
-#else
-        customId = SystemInfo.deviceUniqueIdentifier;
-#endif
-    }
+    private List<string> messages = new List<string>();
 
     void Start()
     {
-        PlayFabSettings.staticSettings.TitleId = "1C16ED";
-        Login();
-
-        SetJumpscareAlpha(0f);
         if (jumpscareImage != null)
             jumpscareImage.gameObject.SetActive(false);
+
+        Connect();
     }
 
-    void Update()
+    // ---------------- CONNECT ----------------
+    void Connect()
     {
-        if (!loggedIn || !joinedGroup) return;
-
-        timer += Time.deltaTime;
-
-        if (timer >= refreshInterval)
-        {
-            timer = 0;
-            RefreshChat();
-        }
+        PhotonNetwork.ConnectUsingSettings();
     }
 
-    #region LOGIN
-
-    void Login()
+    public override void OnConnectedToMaster()
     {
-        var request = new LoginWithCustomIDRequest
-        {
-            CustomId = customId,
-            CreateAccount = true
-        };
+        PhotonNetwork.JoinOrCreateRoom(
+            roomName,
+            new RoomOptions { MaxPlayers = 20 },
+            TypedLobby.Default
+        );
 
-        PlayFabClientAPI.LoginWithCustomID(request,
-            result =>
-            {
-                loggedIn = true;
-                Debug.Log("Login success");
-                EnsureGroupExists();
-            },
-            OnError);
+        Debug.Log("Connected to Photon Master");
     }
 
-    #endregion
-
-    #region GROUP
-
-    void EnsureGroupExists()
+    public override void OnJoinedRoom()
     {
-        var request = new CreateSharedGroupRequest
-        {
-            SharedGroupId = sharedGroupId
-        };
-
-        PlayFabClientAPI.CreateSharedGroup(request,
-            r =>
-            {
-                AddSelfToGroup();
-            },
-            e =>
-            {
-                AddSelfToGroup();
-            });
+        isConnected = true;
+        RefreshChat();
+        Debug.Log("Joined Room: " + roomName);
     }
 
-    void AddSelfToGroup()
-    {
-        var request = new AddSharedGroupMembersRequest
-        {
-            SharedGroupId = sharedGroupId,
-            PlayFabIds = new List<string> { PlayFabSettings.staticPlayer.PlayFabId }
-        };
-
-        PlayFabClientAPI.AddSharedGroupMembers(request,
-            r =>
-            {
-                joinedGroup = true;
-                RefreshChat();
-            },
-            OnError);
-    }
-
-    #endregion
-
-    #region SEND
-
+    // ---------------- SEND MESSAGE ----------------
     public void SendMessage()
     {
-        if (!loggedIn || !joinedGroup) return;
+        if (!isConnected) return;
+        if (string.IsNullOrWhiteSpace(messageInput.text)) return;
 
-        string playerName = string.IsNullOrWhiteSpace(nameInput.text)
+        string name = string.IsNullOrWhiteSpace(nameInput.text)
             ? "Anonymous"
             : nameInput.text.Trim();
 
-        string message = messageInput.text.Trim();
+        string input = messageInput.text.Trim();
+        string msg;
 
-        if (string.IsNullOrEmpty(message)) return;
-
-        string formatted = $"[{playerName}] {message}";
-
-        PlayFabClientAPI.GetSharedGroupData(new GetSharedGroupDataRequest
+        // ---------------- COMMAND: !time ----------------
+        if (input.ToLower() == "!time")
         {
-            SharedGroupId = sharedGroupId
-        },
-        result =>
+            string time = System.DateTime.Now.ToString("HH:mm:ss");
+            msg = $"[{name}] 🕒 {time}";
+        }
+        else
         {
-            List<string> messages = new List<string>();
+            msg = $"[{name}] {input}";
+        }
 
-            if (result.Data != null && result.Data.ContainsKey("CHAT"))
-            {
-                messages = JsonUtility.FromJson<ChatWrapper>(result.Data["CHAT"].Value).messages;
-            }
+        photonView.RPC("ReceiveMessage", RpcTarget.All, msg);
 
-            messages.Add(formatted);
+        messageInput.text = "";
+    }
+
+    // ---------------- RECEIVE MESSAGE ----------------
+    [PunRPC]
+    void ReceiveMessage(string msg)
+    {
+        bool isScaryTree = msg.ToLower().Contains("scary tree");
+
+        // ❌ NIET tonen in chat als het de trigger is
+        if (!isScaryTree)
+        {
+            messages.Add(msg);
 
             if (messages.Count > maxMessages)
                 messages.RemoveAt(0);
-
-            string json = JsonUtility.ToJson(new ChatWrapper { messages = messages });
-
-            PlayFabClientAPI.UpdateSharedGroupData(new UpdateSharedGroupDataRequest
-            {
-                SharedGroupId = sharedGroupId,
-                Data = new Dictionary<string, string>
-                {
-                    { "CHAT", json }
-                }
-            },
-            r =>
-            {
-                messageInput.text = "";
-                RefreshChat();
-            },
-            OnError);
-        },
-        OnError);
-    }
-
-    #endregion
-
-    #region REFRESH + SECRET
-
-    public void RefreshChat()
-    {
-        if (!loggedIn || !joinedGroup) return;
-
-        PlayFabClientAPI.GetSharedGroupData(new GetSharedGroupDataRequest
-        {
-            SharedGroupId = sharedGroupId
-        },
-        result =>
-        {
-            StringBuilder sb = new StringBuilder();
-            bool triggerJumpscare = false;
-
-            if (result.Data != null && result.Data.ContainsKey("CHAT"))
-            {
-                var data = JsonUtility.FromJson<ChatWrapper>(result.Data["CHAT"].Value);
-
-                List<string> cleanedMessages = new List<string>();
-
-                foreach (string msg in data.messages)
-                {
-                    if (msg.ToLower().Contains("scary tree"))
-                    {
-                        triggerJumpscare = true;
-                        continue; // ❌ remove it from chat
-                    }
-
-                    cleanedMessages.Add(msg);
-                    sb.AppendLine(msg);
-                }
-
-                // 🔥 overwrite chat WITHOUT trigger message
-                if (triggerJumpscare)
-                {
-                    string json = JsonUtility.ToJson(new ChatWrapper { messages = cleanedMessages });
-
-                    PlayFabClientAPI.UpdateSharedGroupData(new UpdateSharedGroupDataRequest
-                    {
-                        SharedGroupId = sharedGroupId,
-                        Data = new Dictionary<string, string>
-                        {
-                        { "CHAT", json }
-                        }
-                    }, null, OnError);
-                }
-            }
-            else
-            {
-                sb.AppendLine("No messages yet...");
-            }
-
-            if (chatText != null)
-                chatText.text = sb.ToString();
-
-            if (triggerJumpscare)
-            {
-                StartCoroutine(PlayJumpscare());
-            }
-        },
-        OnError);
-    }
-
-    #endregion
-
-    #region JUMPSCARE
-
-    IEnumerator PlayJumpscare()
-    {
-        if (isJumpscaring) yield break;
-        isJumpscaring = true;
-
-        jumpscareImage.gameObject.SetActive(true);
-        SetJumpscareAlpha(1f);
-
-        if (jumpscareSound != null)
-            jumpscareSound.Play();
-
-        yield return new WaitForSeconds(0.5f);
-
-        float t = 0f;
-        float duration = 1.2f;
-
-        while (t < duration)
-        {
-            t += Time.deltaTime;
-            SetJumpscareAlpha(Mathf.Lerp(1f, 0f, t / duration));
-            yield return null;
         }
 
-        SetJumpscareAlpha(0f);
-        jumpscareImage.gameObject.SetActive(false);
+        RefreshChat();
 
-        isJumpscaring = false;
+        // ✅ maar wel jumpscare triggeren
+        if (isScaryTree)
+        {
+            StartCoroutine(Scare());
+        }
     }
 
-    void SetJumpscareAlpha(float a)
+    // ---------------- UI UPDATE ----------------
+    void RefreshChat()
     {
-        Color c = jumpscareImage.color;
-        c.a = a;
-        jumpscareImage.color = c;
+        if (chatText != null)
+            chatText.text = string.Join("\n", messages);
     }
 
-    #endregion
-
-    #region ERROR
-
-    void OnError(PlayFabError error)
+    // ---------------- JUMPSCARE ----------------
+    IEnumerator Scare()
     {
-        Debug.LogError(error.GenerateErrorReport());
-    }
+        if (isScaring) yield break;
+        isScaring = true;
 
-    #endregion
+        if (jumpscareImage != null)
+        {
+            jumpscareImage.gameObject.SetActive(true);
 
-    [System.Serializable]
-    public class ChatWrapper
-    {
-        public List<string> messages = new List<string>();
+            Color c = jumpscareImage.color;
+            c.a = 1f;
+            jumpscareImage.color = c;
+        }
+
+        jumpscareSound?.Play();
+
+        yield return new WaitForSeconds(1f);
+
+        if (jumpscareImage != null)
+            jumpscareImage.gameObject.SetActive(false);
+
+        isScaring = false;
     }
 }
