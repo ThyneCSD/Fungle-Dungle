@@ -1,6 +1,7 @@
 using TMPro;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CarMechanics1 : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class CarMechanics1 : MonoBehaviour
     [SerializeField] private AudioSource brakeSound;
     [SerializeField] private AudioSource AccelerationSound;
     [SerializeField] private AudioSource nitroSound;
+    public TextMeshProUGUI speedTracker;
 
     [SerializeField] private float topForwardSpeed = 10f;
     [SerializeField] private float topReverseSpeed = -4f;
@@ -269,7 +271,7 @@ public class CarMechanics1 : MonoBehaviour
 
 
         rb.linearVelocity = transform.up * forwardVelocity;
-
+        speedTracker.text = (forwardVelocity * 5).ToString("F0")+ "km/h";
 
         //float speedFactor = Mathf.InverseLerp(0f, 2f, Mathf.Abs(forwardVelocity));
 
