@@ -19,15 +19,19 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
     [SerializeField] private RawImage scaryTreeImage;
     [SerializeField] private RawImage danielImage;
     [SerializeField] private RawImage fortniteImage;
+    [SerializeField] private RawImage igbImage;
 
     [Header("SPECIAL SOUNDS")]
     [SerializeField] private AudioSource scaryTreeSound;
     [SerializeField] private AudioSource danielSound;
     [SerializeField] private AudioSource fortniteSound;
+    [SerializeField] private AudioSource igbSound1;
+    [SerializeField] private AudioSource igbSound2;
 
     [Header("EFFECT SETTINGS")]
     [SerializeField] private float effectDuration = 1f;
     [SerializeField] private float fortniteDelay = 1f;
+    
 
     [Header("SETTINGS")]
     [SerializeField] private string roomName = "MainRoom";
@@ -48,6 +52,9 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
 
         if (fortniteImage != null)
             fortniteImage.gameObject.SetActive(false);
+
+        if (igbImage != null)
+            igbImage.gameObject.SetActive(false);
 
         Connect();
     }
@@ -113,7 +120,8 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
         bool special =
             lower.Contains("scary tree") ||
             lower.Contains("daniel") ||
-            lower.Contains("fortnite");
+            lower.Contains("fortnite") ||
+            lower.Contains("igb");
 
         // Alleen normale berichten in de chat tonen
         if (!special)
@@ -138,6 +146,11 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
         {
             StartCoroutine(ShowEffect(fortniteImage, fortniteSound, fortniteDelay));
         }
+        else if (lower.Contains("igb"))
+        {
+            StartCoroutine(ShowEffect(igbImage, igbSound1, 5f));
+            //StartCoroutine(ShowEffect(igbImage, igbSound2, 1f));
+        }
     }
 
     void RefreshChat()
@@ -148,6 +161,7 @@ public class PhotonChatRoom : MonoBehaviourPunCallbacks
 
     IEnumerator ShowEffect(RawImage image, AudioSource sound, float delay)
     {
+        Debug.Log(sound.name + " command is playing rn");
         if (isShowingEffect)
             yield break;
 
