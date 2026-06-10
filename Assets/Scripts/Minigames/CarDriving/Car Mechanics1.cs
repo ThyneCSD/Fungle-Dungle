@@ -53,6 +53,25 @@ public class CarMechanics1 : MonoBehaviour
 
     }
 
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        
+        Vector2 normal = collision.contacts[0].normal;
+
+        float headOnFactor = Mathf.Abs(
+            Vector2.Dot(transform.up, normal)
+        );
+
+        float impactSpeed = collision.relativeVelocity.magnitude;
+
+        float speedLoss = Mathf.Clamp01(
+            headOnFactor * impactSpeed / 50f
+        );
+
+        forwardVelocity *= (1f - speedLoss);
+        
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
 
@@ -267,10 +286,11 @@ public class CarMechanics1 : MonoBehaviour
 
         //put acceleration to actual movement
 
+        
 
-
-
+        //forwardVelocity = Vector2.Dot(rb.linearVelocity, transform.up);
         rb.linearVelocity = transform.up * forwardVelocity;
+        
         speedTracker.text = (forwardVelocity * 5).ToString("F0")+ "km/h";
 
         //float speedFactor = Mathf.InverseLerp(0f, 2f, Mathf.Abs(forwardVelocity));
