@@ -3,6 +3,7 @@ using TMPro;
 using PlayFab;
 using PlayFab.ClientModels;
 using System.Collections.Generic;
+using System.Collections;
 
 public class OnlineLeaderboard : MonoBehaviour
 {
@@ -34,6 +35,13 @@ public class OnlineLeaderboard : MonoBehaviour
 
         if (autoLoginOnStart)
             Login();
+
+        StartCoroutine(RefreshBoard());
+    }
+
+    private void Update()
+    {
+        RefreshBoard();
     }
 
     public void Login()
@@ -187,6 +195,16 @@ public class OnlineLeaderboard : MonoBehaviour
             leaderboardText.text = output;
 
         Debug.Log(output);
+    }
+
+    private IEnumerator RefreshBoard()
+    {
+        while (true)
+        {
+            GetLeaderboard();
+            yield return new WaitForSeconds(3f);
+            GetLeaderboard();
+        }
     }
 
     void OnError(PlayFabError error)
