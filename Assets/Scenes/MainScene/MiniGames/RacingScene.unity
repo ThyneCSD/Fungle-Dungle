@@ -59041,7 +59041,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 942058962455013394, guid: 202a2326e10247943bea3528e1bb08ba, type: 3}
       propertyPath: boostMultiplier
-      value: 1.4
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 942058962455013394, guid: 202a2326e10247943bea3528e1bb08ba, type: 3}
       propertyPath: topForwardSpeed
@@ -59061,7 +59061,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 942058962455013394, guid: 202a2326e10247943bea3528e1bb08ba, type: 3}
       propertyPath: frictionVelocityDecrease
-      value: 0.6
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2053636451418221733, guid: 202a2326e10247943bea3528e1bb08ba, type: 3}
       propertyPath: m_Name
