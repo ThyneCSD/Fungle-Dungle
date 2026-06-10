@@ -57,6 +57,8 @@ public class OnlineLeaderboard : MonoBehaviour
         loginInProgress = false;
         loggedIn = true;
 
+        UploadScore(GameState.Money);
+
         Debug.Log("Login success ez as lah");
     }
 
