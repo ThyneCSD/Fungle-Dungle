@@ -20,10 +20,12 @@ public class OnlineLeaderboardRacing : MonoBehaviour
     private bool loginInProgress = false;
     private string customId;
 
+    private const int MAX_SCORE = 100000000;
+
     void Awake()
     {
 #if UNITY_EDITOR
-        customId = "EDITOR_TEST_USER" + SystemInfo.deviceUniqueIdentifier;
+        customId = "EDITOR_TEST_USER_" + SystemInfo.deviceUniqueIdentifier;
 #else
         customId = SystemInfo.deviceUniqueIdentifier;
 #endif
@@ -39,11 +41,6 @@ public class OnlineLeaderboardRacing : MonoBehaviour
         StartCoroutine(RefreshBoard());
     }
 
-    private void Update()
-    {
-        RefreshBoard();
-    }
-
     public void Login()
     {
         if (loginInProgress || loggedIn)
@@ -57,7 +54,11 @@ public class OnlineLeaderboardRacing : MonoBehaviour
             CreateAccount = true
         };
 
-        PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnLoginFail);
+        PlayFabClientAPI.LoginWithCustomID(
+            request,
+            OnLoginSuccess,
+            OnLoginFail
+        );
     }
 
     void OnLoginSuccess(LoginResult result)
@@ -65,16 +66,16 @@ public class OnlineLeaderboardRacing : MonoBehaviour
         loginInProgress = false;
         loggedIn = true;
 
-        UploadScore(GameState.Money);
+        UploadLapTime();
 
-        Debug.Log("Login success ez as lah");
+        Debug.Log("Logged into PlayFab!");
     }
 
     void OnLoginFail(PlayFabError error)
     {
         loginInProgress = false;
 
-        Debug.LogWarning(" Login FOKING FAILED: " + error.ErrorMessage);
+        Debug.LogError(error.GenerateErrorReport());
 
         var request = new LoginWithCustomIDRequest
         {
@@ -82,63 +83,46 @@ public class OnlineLeaderboardRacing : MonoBehaviour
             CreateAccount = false
         };
 
-        PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnError);
+        PlayFabClientAPI.LoginWithCustomID(
+            request,
+            OnLoginSuccess,
+            OnError
+        );
     }
 
     public void SetDisplayNameFromInput()
     {
         if (!loggedIn)
-        {
-            Debug.LogWarning("Not logged in brah");
             return;
-        }
-
-        if (nameInput == null)
-        {
-            Debug.LogError("NameInput not assigned in Inspector");
-            return;
-        }
 
         string newName = nameInput.text.Trim();
 
-        Debug.Log("Trying to set name: " + newName);
-
         if (string.IsNullOrEmpty(newName))
-        {
-            Debug.LogWarning("Name is empty non extiasta");
             return;
-        }
-
-        var request = new UpdateUserTitleDisplayNameRequest
-        {
-            DisplayName = newName
-        };
 
         PlayFabClientAPI.UpdateUserTitleDisplayName(
-            request,
+            new UpdateUserTitleDisplayNameRequest
+            {
+                DisplayName = newName
+            },
             result =>
             {
-                Debug.Log("🔥 NAME SUCCESS: " + newName);
+                Debug.Log("Name updated!");
             },
-            error =>
-            {
-                Debug.LogError("🔥 NAME ERROR: " + error.GenerateErrorReport());
-            }
+            OnError
         );
     }
 
-    public void UploadScoreFromInput()
+    public void UploadLapTime()
     {
         if (!loggedIn)
-        {
-            Debug.LogWarning("Not logged in brah");
             return;
-        }
-        //UploadScore(racingShit);
-    }
 
-    public void UploadScore(int score)
-    {
+        if (GameStateR.LapTime == Mathf.Infinity)
+            return;
+
+        int score = MAX_SCORE - Mathf.RoundToInt(GameStateR.LapTime * 1000f);
+
         var request = new UpdatePlayerStatisticsRequest
         {
             Statistics = new List<StatisticUpdate>
@@ -153,7 +137,7 @@ public class OnlineLeaderboardRacing : MonoBehaviour
 
         PlayFabClientAPI.UpdatePlayerStatistics(
             request,
-            result => Debug.Log("🔥 Score uploaded: " + score),
+            result => Debug.Log("Lap uploaded!"),
             OnError
         );
     }
@@ -161,10 +145,7 @@ public class OnlineLeaderboardRacing : MonoBehaviour
     public void GetLeaderboard()
     {
         if (!loggedIn)
-        {
-            Debug.LogWarning("Not logged in brah");
             return;
-        }
 
         var request = new GetLeaderboardRequest
         {
@@ -173,12 +154,16 @@ public class OnlineLeaderboardRacing : MonoBehaviour
             MaxResultsCount = 10
         };
 
-        PlayFabClientAPI.GetLeaderboard(request, OnLeaderboardReceived, OnError);
+        PlayFabClientAPI.GetLeaderboard(
+            request,
+            OnLeaderboardReceived,
+            OnError
+        );
     }
 
     void OnLeaderboardReceived(GetLeaderboardResult result)
     {
-        string output = "===== TOP 10 =====\n\n";
+        string output = "===== FASTEST LAPS =====\n\n";
 
         foreach (var player in result.Leaderboard)
         {
@@ -186,24 +171,28 @@ public class OnlineLeaderboardRacing : MonoBehaviour
                 ? "Unknown"
                 : player.DisplayName;
 
+            float lapTime =
+                (MAX_SCORE - player.StatValue) / 1000f;
+
             output += "#" + (player.Position + 1)
-                + " | " + name
-                + " | " + player.StatValue + "\n";
+                + " | "
+                + name
+                + " | "
+                + lapTime.ToString("F2")
+                + "s\n";
         }
 
-        if (leaderboardText != null)
-            leaderboardText.text = output;
-
-        Debug.Log(output);
+        leaderboardText.text = output;
     }
 
-    private IEnumerator RefreshBoard()
+    IEnumerator RefreshBoard()
     {
         while (true)
         {
-            GetLeaderboard();
+            if (loggedIn)
+                GetLeaderboard();
+
             yield return new WaitForSeconds(3f);
-            GetLeaderboard();
         }
     }
 
@@ -212,21 +201,21 @@ public class OnlineLeaderboardRacing : MonoBehaviour
         Debug.LogError(error.GenerateErrorReport());
     }
 
-    [ContextMenu("Set Name")]
-    public void TestSetName()
+    [ContextMenu("Upload Lap")]
+    public void TestUpload()
     {
-        SetDisplayNameFromInput();
-    }
-
-    [ContextMenu("Upload Score")]
-    public void TestScore()
-    {
-        UploadScoreFromInput();
+        UploadLapTime();
     }
 
     [ContextMenu("Get Leaderboard")]
     public void TestLeaderboard()
     {
         GetLeaderboard();
+    }
+
+    [ContextMenu("Set Name")]
+    public void TestName()
+    {
+        SetDisplayNameFromInput();
     }
 }
